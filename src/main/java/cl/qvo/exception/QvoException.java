@@ -3,7 +3,7 @@ package cl.qvo.exception;
 import lombok.ToString;
 
 @ToString(callSuper = true)
-public class QvoException extends Throwable {
+public class QvoException extends Exception {
     public QvoException() {
     }
 
