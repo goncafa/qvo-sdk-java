@@ -1,10 +1,3 @@
 language: java
 jdk:
   - oraclejdk8
-addons:
-  sonarcloud:
-    organization: "goncafa-github"
-    token:
-      secure: Iv6HvNykrWjIikLgrHY86czO3cVAklX7kWaX6nMKM3lm/SqvdYj21NQJIFnKTUZzU6QJYW7xv3xjEqOA9zOsCj02dnFWON3ntxBVOcgQQOeCS2qJzj/QwyOgXmmc9H3tBGRcJUh5aRY88o0jKyIW6uoQZZbEJQiUGWUoLAd1O/lvZoeIKkdWlGMydE57GpCXJ7c0OfaQvQR3Kf3n6jw/fYl9wAIbVPPDPzWDxsnKZsZoRFsPJhhPtBqq+dVkq1N5syOpUNfytccv5M1TpEdwKPgH9gAKGYMrvPXDeYQbYrwQHmta/kZ4zFtMGlWnHlkbdoRABnJmiR0T+HICROmcWaaTBMb/0RRa9x4tsn0lsCaw1Bmhy4fELcscaI15h8hRF6COjDkN3xn/GoZc+hNQbB9bCURufliPMdmiQggI3bZJxb2lGT1uggUGOIFUQkHdbqvY0yzSW8ypj5XYkjj6N+ntvC6abPtviQeczm7i+QyaO3PkEq5RljI5TUVc/nReXFUEEWxZoTo3m+2ys38kOSsoYoPHYx/sf/eqiLU/2Bi3dmUZDFH8QecAROzmWEWh7lxyhLxZcdKO4NO6wKNwfebGUsYL5qHVKhXrpSC38H/J7OXDNXG/buzwaUnbs2phkOK5DZus5uJ5SWJoAmhidu3MO3Ix+0mTGKIOoNcpSeI=
-script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar
