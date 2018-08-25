@@ -1,7 +1,9 @@
 package cl.qvo.net.http.exception;
 
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
 public class RestClientException extends Exception {
     @Getter private final int code;
 
