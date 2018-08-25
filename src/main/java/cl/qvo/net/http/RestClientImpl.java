@@ -71,7 +71,7 @@ public class RestClientImpl extends HttpChannelImpl implements RestClient {
                 try (final Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
                     String response = scanner.useDelimiter("\\A").next();
 
-                    if (isOk)
+                    if (!isOk)
                         throw new RestClientException(responseCode, response);
 
                     return response;
