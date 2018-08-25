@@ -64,11 +64,17 @@ public class RestClientImpl extends HttpChannelImpl implements RestClient {
             // read response data
             // if response code is < HttpURLConnection.HTTP_BAD_REQUEST read the InputStream
             // else response come on ErrorStream
-            try (final InputStream inputStream = (responseCode < HttpURLConnection.HTTP_BAD_REQUEST) ?
+            boolean isOk = responseCode < HttpURLConnection.HTTP_BAD_REQUEST;
+            try (final InputStream inputStream = (isOk) ?
                     post.getInputStream() :
                     post.getErrorStream()) {
                 try (final Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
-                    return scanner.useDelimiter("\\A").next();
+                    String response = scanner.useDelimiter("\\A").next();
+
+                    if (isOk)
+                        throw new RestClientException(responseCode, response);
+
+                    return response;
                 }
             }
         } catch (IOException e) {
