@@ -1,13 +1,21 @@
 package cl.qvo.model;
 
-import lombok.Data;
+import cl.qvo.net.http.exception.RestException;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@Data
-public class Customer implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString
+public class Customer extends Model implements Serializable {
     /**
      * Object unique identification
      */
@@ -52,4 +60,10 @@ public class Customer implements Serializable {
      * Object update date
      */
     private Date updatedAt;
+
+    public Customer create() throws RestException {
+        return (Customer) post();
+    }
+
+    @Setter(AccessLevel.NONE) @Getter(AccessLevel.PROTECTED) private String endpoint = "customers";
 }

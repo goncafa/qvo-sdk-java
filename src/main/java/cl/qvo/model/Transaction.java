@@ -1,4 +1,6 @@
 package cl.qvo.model;
 
-public class Transaction {
+import java.io.Serializable;
+
+public class Transaction implements Serializable {
 }

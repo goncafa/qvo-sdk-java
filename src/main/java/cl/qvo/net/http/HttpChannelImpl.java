@@ -1,6 +1,6 @@
 package cl.qvo.net.http;
 
-import cl.qvo.net.http.exception.HttpChannelException;
+import cl.qvo.net.http.exception.HttpException;
 import lombok.NonNull;
 
 import javax.net.ssl.*;
@@ -13,13 +13,13 @@ import java.security.cert.X509Certificate;
 
 public class HttpChannelImpl implements HttpChannel {
     public HttpURLConnection createPostConnection(@NonNull final URL endpoint)
-            throws HttpChannelException {
+            throws HttpException {
         return createConnection(endpoint, HttpRequestMethod.POST, false, true, true);
     }
 
     public HttpURLConnection createPostConnection(@NonNull final URL endpoint,
                                                   final boolean ignoreUncknownSSLCertificates)
-            throws HttpChannelException {
+            throws HttpException {
         return createConnection(endpoint, HttpRequestMethod.POST, false, true, true, ignoreUncknownSSLCertificates);
     }
 
@@ -27,7 +27,7 @@ public class HttpChannelImpl implements HttpChannel {
                                        @NonNull final HttpRequestMethod method,
                                        final boolean useCaches,
                                        final boolean doInput,
-                                       final boolean doOutput) throws HttpChannelException {
+                                       final boolean doOutput) throws HttpException {
         return createConnection(endpoint, HttpRequestMethod.POST, false, true, true, false);
     }
 
@@ -36,7 +36,7 @@ public class HttpChannelImpl implements HttpChannel {
                                               final boolean useCaches,
                                               final boolean doInput,
                                               final boolean doOutput,
-                                              final boolean ignoreUncknownSSLCertificates) throws HttpChannelException {
+                                              final boolean ignoreUncknownSSLCertificates) throws HttpException {
         // if ignoreUncknownSSLCertificates is true then accept
         // any certificate to avoid SSL Exceptions.
         // RECOMMENDED ONLY FOR TEST CASES
@@ -55,9 +55,9 @@ public class HttpChannelImpl implements HttpChannel {
             if (urlConnection instanceof HttpURLConnection)
                 httpURLConnection = (HttpURLConnection) urlConnection;
             else
-                throw new HttpChannelException("Provided endpoint could not open a valid http connection");
+                throw new HttpException("Provided endpoint could not open a valid http connection");
         } catch (IOException e) {
-           throw new HttpChannelException(e);
+           throw new HttpException(e);
         }
 
         httpURLConnection.setUseCaches(useCaches);
@@ -68,13 +68,13 @@ public class HttpChannelImpl implements HttpChannel {
         try {
             httpURLConnection.setRequestMethod(method.name());
         } catch (ProtocolException e) {
-            throw new HttpChannelException(e);
+            throw new HttpException(e);
         }
 
         return httpURLConnection;
     }
 
-    private void ignoreUnknownSSLCerticates() throws HttpChannelException {
+    private void ignoreUnknownSSLCerticates() throws HttpException {
         TrustManager[] trustManagers = new TrustManager[] { new X509TrustManager() {
             @Override
             public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
@@ -97,7 +97,7 @@ public class HttpChannelImpl implements HttpChannel {
             sc = SSLContext.getInstance("TLSv1.2");
             sc.init(null, trustManagers, null);
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            throw new HttpChannelException(e);
+            throw new HttpException(e);
         }
 
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
