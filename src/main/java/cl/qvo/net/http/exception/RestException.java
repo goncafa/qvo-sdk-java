@@ -4,45 +4,45 @@ import lombok.Getter;
 import lombok.ToString;
 
 @ToString
-public class RestClientException extends Exception {
+public class RestException extends Exception {
     @Getter private final int code;
 
-    public RestClientException(String message) {
+    public RestException(String message) {
         super(message);
         this.code = -1;
     }
 
-    public RestClientException(int code, String message) {
+    public RestException(int code, String message) {
         super(message);
         this.code = code;
     }
 
-    public RestClientException(String message, Throwable cause) {
+    public RestException(String message, Throwable cause) {
         super(message, cause);
         this.code = -1;
     }
 
-    public RestClientException(int code, String message, Throwable cause) {
+    public RestException(int code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
     }
 
-    public RestClientException(Throwable cause) {
+    public RestException(Throwable cause) {
         super(cause);
         this.code = -1;
     }
 
-    public RestClientException(int code, Throwable cause) {
+    public RestException(int code, Throwable cause) {
         super(cause);
         this.code = code;
     }
 
-    public RestClientException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public RestException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.code = -1;
     }
 
-    public RestClientException(int code, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public RestException(int code, String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.code = code;
     }

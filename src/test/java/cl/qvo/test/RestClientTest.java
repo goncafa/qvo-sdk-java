@@ -2,7 +2,7 @@ package cl.qvo.test;
 
 import cl.qvo.net.http.RestClient;
 import cl.qvo.net.http.RestClientImpl;
-import cl.qvo.net.http.exception.RestClientException;
+import cl.qvo.net.http.exception.RestException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -17,7 +17,7 @@ public class RestClientTest {
     private static Logger log = LoggerFactory.getLogger(RestClientTest.class);
 
     @Test
-    public void testPostJsonReal() throws RestClientException {
+    public void testPostJsonReal() throws RestException {
         RestClient restClient = RestClientImpl.getInstance();
         final String jsonOut = restClient.postJson("https://jsonplaceholder.typicode.com/users",
                 "{\"name\": \"Leanne Graham\"}");
