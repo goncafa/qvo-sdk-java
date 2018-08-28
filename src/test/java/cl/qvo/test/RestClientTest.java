@@ -9,6 +9,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 
@@ -23,5 +24,19 @@ public class RestClientTest {
                 "{\"name\": \"Leanne Graham\"}");
         log.debug(jsonOut);
         assertNotNull(jsonOut);
+    }
+
+    @Test
+    public void testQuery() throws RestException {
+        RestClient restClient = RestClientImpl.getInstance();
+        final String response = restClient.query("http://www.google.com");
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+    }
+
+    @Test(expected = RestException.class)
+    public void testQueryUnknownHost() throws RestException {
+        RestClient restClient = RestClientImpl.getInstance();
+        restClient.query("http://www.elpppp.com");
     }
 }

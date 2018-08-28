@@ -20,4 +20,8 @@ public interface RestClient {
                     @NonNull final String jsonIn,
                     Map<String,String> requestProperties,
                     final boolean ignoreUncknownSSLCertificates) throws RestException;
+
+    String query(@NonNull final String endpoint) throws RestException;
+
+    String query(@NonNull final String endpoint, String query) throws RestException;
 }
