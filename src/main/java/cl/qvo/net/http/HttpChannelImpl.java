@@ -12,30 +12,49 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class HttpChannelImpl implements HttpChannel {
+    public HttpURLConnection createGetConnection(@NonNull URL endpoint) throws HttpException {
+        return createGetConnection(endpoint, null);
+    }
+
+    public HttpURLConnection createGetConnection(@NonNull URL endpoint, String query) throws HttpException {
+        if (null != query && !query.isEmpty()) {
+            String url = endpoint.toString();
+            // In some cases, URL can already contain a question mark
+            String separator = url.contains("?") ? "&" : "?";
+            try {
+                endpoint = new URL(String.format("%s%s%s", url, separator, query));
+            } catch (MalformedURLException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        return createConnection(endpoint, HttpRequestMethod.GET);
+    }
     public HttpURLConnection createPostConnection(@NonNull final URL endpoint)
             throws HttpException {
-        return createConnection(endpoint, HttpRequestMethod.POST, false, true, true);
+        return createPostConnection(endpoint, false);
     }
 
     public HttpURLConnection createPostConnection(@NonNull final URL endpoint,
                                                   final boolean ignoreUncknownSSLCertificates)
             throws HttpException {
-        return createConnection(endpoint, HttpRequestMethod.POST, false, true, true, ignoreUncknownSSLCertificates);
+        final HttpURLConnection httpURLConnection = createConnection(
+                endpoint,
+                HttpRequestMethod.POST,
+                ignoreUncknownSSLCertificates);
+        httpURLConnection.setDoInput(true);
+        httpURLConnection.setDoOutput(true);
+
+        return httpURLConnection;
     }
 
     public HttpURLConnection createConnection(@NonNull final URL endpoint,
-                                       @NonNull final HttpRequestMethod method,
-                                       final boolean useCaches,
-                                       final boolean doInput,
-                                       final boolean doOutput) throws HttpException {
-        return createConnection(endpoint, HttpRequestMethod.POST, false, true, true, false);
+                                       @NonNull final HttpRequestMethod method) throws HttpException {
+        return createConnection(endpoint, method, false);
     }
 
     public HttpURLConnection createConnection(@NonNull final URL endpoint,
                                               @NonNull final HttpRequestMethod method,
-                                              final boolean useCaches,
-                                              final boolean doInput,
-                                              final boolean doOutput,
                                               final boolean ignoreUncknownSSLCertificates) throws HttpException {
         // if ignoreUncknownSSLCertificates is true then accept
         // any certificate to avoid SSL Exceptions.
@@ -60,16 +79,14 @@ public class HttpChannelImpl implements HttpChannel {
            throw new HttpException(e);
         }
 
-        httpURLConnection.setUseCaches(useCaches);
-        httpURLConnection.setDoInput(doInput);
-        httpURLConnection.setDoOutput(doOutput);
-
         // we use an enum with valid http methods only so this exception should never be thrown
         try {
             httpURLConnection.setRequestMethod(method.name());
         } catch (ProtocolException e) {
             throw new HttpException(e);
         }
+
+        httpURLConnection.setUseCaches(false);
 
         return httpURLConnection;
     }
