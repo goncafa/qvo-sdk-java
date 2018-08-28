@@ -2,6 +2,7 @@ package cl.qvo.net.http;
 
 import cl.qvo.net.http.exception.HttpException;
 import lombok.NonNull;
+import lombok.Synchronized;
 
 import javax.net.ssl.*;
 import java.io.IOException;
@@ -12,30 +13,25 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class HttpChannelImpl implements HttpChannel {
-    public HttpURLConnection createGetConnection(@NonNull URL endpoint) throws HttpException {
+    public HttpURLConnection createGetConnection(@NonNull String endpoint) throws HttpException {
         return createGetConnection(endpoint, null);
     }
 
-    public HttpURLConnection createGetConnection(@NonNull URL endpoint, String query) throws HttpException {
+    public HttpURLConnection createGetConnection(@NonNull String endpoint, String query) throws HttpException {
         if (null != query && !query.isEmpty()) {
-            String url = endpoint.toString();
             // In some cases, URL can already contain a question mark
-            String separator = url.contains("?") ? "&" : "?";
-            try {
-                endpoint = new URL(String.format("%s%s%s", url, separator, query));
-            } catch (MalformedURLException e) {
-                throw new IllegalStateException(e);
-            }
+            String separator = endpoint.contains("?") ? "&" : "?";
+            endpoint = String.format("%s%s%s", endpoint, separator, query);
         }
 
         return createConnection(endpoint, HttpRequestMethod.GET);
     }
-    public HttpURLConnection createPostConnection(@NonNull final URL endpoint)
+    public HttpURLConnection createPostConnection(@NonNull final String endpoint)
             throws HttpException {
         return createPostConnection(endpoint, false);
     }
 
-    public HttpURLConnection createPostConnection(@NonNull final URL endpoint,
+    public HttpURLConnection createPostConnection(@NonNull final String endpoint,
                                                   final boolean ignoreUncknownSSLCertificates)
             throws HttpException {
         final HttpURLConnection httpURLConnection = createConnection(
@@ -48,14 +44,21 @@ public class HttpChannelImpl implements HttpChannel {
         return httpURLConnection;
     }
 
-    public HttpURLConnection createConnection(@NonNull final URL endpoint,
+    public HttpURLConnection createConnection(@NonNull final String endpoint,
                                        @NonNull final HttpRequestMethod method) throws HttpException {
         return createConnection(endpoint, method, false);
     }
 
-    public HttpURLConnection createConnection(@NonNull final URL endpoint,
+    public HttpURLConnection createConnection(@NonNull final String endpoint,
                                               @NonNull final HttpRequestMethod method,
                                               final boolean ignoreUncknownSSLCertificates) throws HttpException {
+        final URL url;
+        try {
+            url = new URL(endpoint);
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
+
         // if ignoreUncknownSSLCertificates is true then accept
         // any certificate to avoid SSL Exceptions.
         // RECOMMENDED ONLY FOR TEST CASES
@@ -67,7 +70,7 @@ public class HttpChannelImpl implements HttpChannel {
 
         // try to pen http connection
         try {
-            final URLConnection urlConnection = endpoint.openConnection();
+            final URLConnection urlConnection = url.openConnection();
 
             // if connection is an http connection assign it
             // else throw an exception
@@ -127,5 +130,19 @@ public class HttpChannelImpl implements HttpChannel {
         };
 
         HttpsURLConnection.setDefaultHostnameVerifier(allHostValid);
+    }
+
+    private static HttpChannelImpl instance;
+
+    @Synchronized
+    public static HttpChannelImpl getInstance() {
+        if (null == instance)
+            instance = new HttpChannelImpl();
+
+        return instance;
+    }
+
+    private HttpChannelImpl() {
+        super();
     }
 }

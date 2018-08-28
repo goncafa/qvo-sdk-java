@@ -2,19 +2,22 @@ package cl.qvo.net.http;
 
 import cl.qvo.net.http.exception.HttpException;
 import cl.qvo.net.http.exception.RestException;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
 
-public class RestClientImpl extends HttpChannelImpl implements RestClient {
+public class RestClientImpl implements RestClient {
+    @Getter @Setter
+    private HttpChannel httpChannel = HttpChannelImpl.getInstance();
+
     public String postJson(@NonNull final String endpoint, @NonNull final String jsonIn) throws RestException {
         return postJson(endpoint, jsonIn, null);
     }
@@ -35,36 +38,9 @@ public class RestClientImpl extends HttpChannelImpl implements RestClient {
                            @NonNull final String jsonIn,
                            Map<String,String> requestProperties,
                            final boolean ignoreUncknownSSLCertificates) throws RestException {
-        try {
-            return postJson(new URL(endpoint), jsonIn, requestProperties, ignoreUncknownSSLCertificates);
-        } catch (MalformedURLException e) {
-            throw new RestException(e);
-        }
-    }
-
-    public String postJson(@NonNull final URL endpoint, @NonNull final String jsonIn) throws RestException {
-        return postJson(endpoint, jsonIn, null);
-    }
-
-    public String postJson(@NonNull final URL endpoint,
-                           @NonNull final String jsonIn,
-                           final boolean ignoreUncknownSSLCertificates) throws RestException {
-        return postJson(endpoint, jsonIn, null, ignoreUncknownSSLCertificates);
-    }
-
-    public String postJson(@NonNull final URL endpoint,
-                           @NonNull final String jsonIn,
-                           Map<String,String> requestProperties) throws RestException {
-        return postJson(endpoint, jsonIn, requestProperties, false);
-    }
-
-    public String postJson(@NonNull final URL endpoint,
-                           @NonNull final String jsonIn,
-                           final Map<String,String> requestProperties,
-                           final boolean ignoreUncknownSSLCertificates) throws RestException {
         final HttpURLConnection post;
         try {
-            post = super.createPostConnection(endpoint, ignoreUncknownSSLCertificates);
+            post = getHttpChannel().createPostConnection(endpoint, ignoreUncknownSSLCertificates);
         } catch (HttpException e) {
             throw new RestException(e);
         }
