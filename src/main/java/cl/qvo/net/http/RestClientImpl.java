@@ -88,6 +88,37 @@ public class RestClientImpl implements RestClient {
         }
     }
 
+    public String query(@NonNull final String endpoint) throws RestException {
+        return query(endpoint, null);
+    }
+
+    public String query(@NonNull final String endpoint, String query) throws RestException {
+        final HttpURLConnection get;
+        try {
+            get = httpChannel.createGetConnection(endpoint, query);
+            final int responseCode = get.getResponseCode();
+
+            // read response data
+            // if response code is < HttpURLConnection.HTTP_BAD_REQUEST read the InputStream
+            // else response come on ErrorStream
+            boolean isOk = responseCode < HttpURLConnection.HTTP_BAD_REQUEST;
+            try (final InputStream inputStream = (isOk) ?
+                    get.getInputStream() :
+                    get.getErrorStream()) {
+                try (final Scanner scanner = new Scanner(inputStream, StandardCharsets.UTF_8.name())) {
+                    String response = scanner.useDelimiter("\\A").next();
+
+                    if (!isOk)
+                        throw new RestException(responseCode, response);
+
+                    return response;
+                }
+            }
+        } catch (IOException | HttpException e) {
+            throw new RestException(e);
+        }
+    }
+
     private static RestClientImpl instance;
 
     public static RestClientImpl getInstance() {
