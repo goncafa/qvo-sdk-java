@@ -37,6 +37,6 @@ public class RestClientTest {
     @Test(expected = RestException.class)
     public void testQueryUnknownHost() throws RestException {
         RestClient restClient = RestClientImpl.getInstance();
-        restClient.query("http://www.elpppp.com");
+        restClient.query("http://www.anyfakerurl.goncafa");
     }
 }

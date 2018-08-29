@@ -32,7 +32,7 @@ abstract class Model {
                 .create();
     }
 
-    Model post() throws RestException {
+    Model post(Object data) throws RestException {
         ApiEnvironment apiEnvironment = Qvo.getApiEnvironment();
         if (null == apiEnvironment)
             apiEnvironment = ApiEnvironment.SANDBOX;
@@ -42,7 +42,25 @@ abstract class Model {
         qvoHeaders.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
 
         String url = String.format("%s/%s", apiEnvironment, getEndpoint());
-        String jsonOut = getRestClient().postJson(url, gson.toJson(this), qvoHeaders, Qvo.isIgnoreUncknownSSLCertificates());
+        String jsonOut = getRestClient().postJson(url, gson.toJson(data), qvoHeaders);
+
+        final Class<? extends Model> type = getClass();
+        copy(gson.fromJson(jsonOut, type));
+
+        return this;
+    }
+
+    Model get() throws RestException {
+        ApiEnvironment apiEnvironment = Qvo.getApiEnvironment();
+        if (null == apiEnvironment)
+            apiEnvironment = ApiEnvironment.SANDBOX;
+
+        // set qvo authorization header
+        Map<String, String> qvoHeaders = new HashMap<>();
+        qvoHeaders.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
+
+        String url = String.format("%s/%s/%s", apiEnvironment, getEndpoint(), getId());
+        final String jsonOut = getRestClient().query(url, qvoHeaders);
 
         final Class<? extends Model> type = getClass();
         copy(gson.fromJson(jsonOut, type));
@@ -68,6 +86,8 @@ abstract class Model {
             }
         }
     }
+
+    abstract String getId();
 
     abstract String getEndpoint();
 

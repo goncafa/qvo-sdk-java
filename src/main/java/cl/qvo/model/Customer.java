@@ -62,7 +62,11 @@ public class Customer extends Model implements Serializable {
     private Date updatedAt;
 
     public Customer create() throws RestException {
-        return (Customer) post();
+        return (Customer) post(this);
+    }
+
+    public Customer load() throws RestException {
+        return (Customer) get();
     }
 
     @Setter(AccessLevel.NONE) @Getter(AccessLevel.PROTECTED) private String endpoint = "customers";
