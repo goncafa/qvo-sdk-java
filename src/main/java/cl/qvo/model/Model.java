@@ -33,39 +33,47 @@ abstract class Model {
     }
 
     Model post(Object data) throws RestException {
-        ApiEnvironment apiEnvironment = Qvo.getApiEnvironment();
-        if (null == apiEnvironment)
-            apiEnvironment = ApiEnvironment.SANDBOX;
+        String url = String.format("%s/%s", getEnvironment(), getEndpoint());
+        String jsonOut = getRestClient().postJson(url, gson.toJson(data), addQvoAuthorizationHeader());
 
-        // set qvo authorization header
-        Map<String, String> qvoHeaders = new HashMap<>();
-        qvoHeaders.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
-
-        String url = String.format("%s/%s", apiEnvironment, getEndpoint());
-        String jsonOut = getRestClient().postJson(url, gson.toJson(data), qvoHeaders);
-
-        final Class<? extends Model> type = getClass();
-        copy(gson.fromJson(jsonOut, type));
+        copy(gson.fromJson(jsonOut, getClass()));
 
         return this;
     }
 
     Model get() throws RestException {
-        ApiEnvironment apiEnvironment = Qvo.getApiEnvironment();
-        if (null == apiEnvironment)
-            apiEnvironment = ApiEnvironment.SANDBOX;
+        String url = String.format("%s/%s/%s", getEnvironment(), getEndpoint(), getId());
+        final String jsonOut = getRestClient().query(url, addQvoAuthorizationHeader());
 
-        // set qvo authorization header
-        Map<String, String> qvoHeaders = new HashMap<>();
-        qvoHeaders.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
-
-        String url = String.format("%s/%s/%s", apiEnvironment, getEndpoint(), getId());
-        final String jsonOut = getRestClient().query(url, qvoHeaders);
-
-        final Class<? extends Model> type = getClass();
-        copy(gson.fromJson(jsonOut, type));
+        copy(gson.fromJson(jsonOut, getClass()));
 
         return this;
+    }
+
+    Model update() {
+
+        return null;
+    }
+
+    private ApiEnvironment getEnvironment() {
+        if (null == Qvo.getApiEnvironment())
+            return ApiEnvironment.SANDBOX;
+
+        return Qvo.getApiEnvironment();
+    }
+
+    private Map<String, String> addQvoAuthorizationHeader() {
+        return addQvoAuthorizationHeader(null);
+    }
+
+    private Map<String, String> addQvoAuthorizationHeader(Map<String, String> headers) {
+        if (null == headers)
+            headers = new HashMap<>();
+
+        // set qvo authorization header
+        headers.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
+
+        return headers;
     }
 
     private void copy(Model origin) {
