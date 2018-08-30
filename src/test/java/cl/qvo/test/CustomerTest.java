@@ -8,14 +8,18 @@ import cl.qvo.net.http.exception.RestException;
 import com.github.javafaker.Faker;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.FixMethodOrder;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.Assert.assertNotNull;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CustomerTest {
     private Logger log = LoggerFactory.getLogger(CustomerTest.class);
     private static Faker faker;
+    private static String customerId;
 
     @BeforeClass
     public static void setup() {
@@ -27,7 +31,7 @@ public class CustomerTest {
     }
 
     @Test
-    public void testCreateLoad() throws RestException {
+    public void a_CreateTest() throws RestException {
         Customer create = new Customer()
                 .setName(faker.name().fullName())
                 .setEmail(faker.internet().emailAddress())
@@ -38,13 +42,15 @@ public class CustomerTest {
         assertNotNull(create);
         assertNotNull(create.getId());
 
+        customerId = create.getId();
+
         log.debug(create.toString());
     }
 
     @Test
-    public void testLoad() throws RestException {
+    public void b_LoadTest() throws RestException {
         Customer customer = new Customer()
-                .setId("cus_X7nvW9rFEHdm_-ib0Bds9Q");
+                .setId(customerId);
         log.debug(customer.load().toString());
     }
 }
