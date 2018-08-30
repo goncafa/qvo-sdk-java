@@ -1,7 +1,9 @@
 package cl.qvo.net.http;
 
 import cl.qvo.net.http.exception.HttpException;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.Synchronized;
 
 import javax.net.ssl.*;
@@ -13,6 +15,14 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class HttpChannelImpl implements HttpChannel {
+    /**
+     * if ignoreUncknownSSLCertificates is true then accept
+     * any certificate to avoid SSL Exceptions.
+     * RECOMMENDED ONLY FOR TEST CASES
+     */
+    @Getter @Setter
+    private static boolean ignoreUncknownSSLCertificates = false;
+
     public HttpURLConnection createGetConnection(@NonNull String endpoint) throws HttpException {
         return createGetConnection(endpoint, null);
     }
@@ -26,18 +36,12 @@ public class HttpChannelImpl implements HttpChannel {
 
         return createConnection(endpoint, HttpRequestMethod.GET);
     }
-    public HttpURLConnection createPostConnection(@NonNull final String endpoint)
-            throws HttpException {
-        return createPostConnection(endpoint, false);
-    }
 
-    public HttpURLConnection createPostConnection(@NonNull final String endpoint,
-                                                  final boolean ignoreUncknownSSLCertificates)
+    public HttpURLConnection createPostConnection(@NonNull final String endpoint)
             throws HttpException {
         final HttpURLConnection httpURLConnection = createConnection(
                 endpoint,
-                HttpRequestMethod.POST,
-                ignoreUncknownSSLCertificates);
+                HttpRequestMethod.POST);
         httpURLConnection.setDoInput(true);
         httpURLConnection.setDoOutput(true);
 
@@ -45,13 +49,7 @@ public class HttpChannelImpl implements HttpChannel {
     }
 
     public HttpURLConnection createConnection(@NonNull final String endpoint,
-                                       @NonNull final HttpRequestMethod method) throws HttpException {
-        return createConnection(endpoint, method, false);
-    }
-
-    public HttpURLConnection createConnection(@NonNull final String endpoint,
-                                              @NonNull final HttpRequestMethod method,
-                                              final boolean ignoreUncknownSSLCertificates) throws HttpException {
+                                              @NonNull final HttpRequestMethod method) throws HttpException {
         final URL url;
         try {
             url = new URL(endpoint);
@@ -59,10 +57,7 @@ public class HttpChannelImpl implements HttpChannel {
             throw new IllegalStateException(e);
         }
 
-        // if ignoreUncknownSSLCertificates is true then accept
-        // any certificate to avoid SSL Exceptions.
-        // RECOMMENDED ONLY FOR TEST CASES
-        if (ignoreUncknownSSLCertificates) {
+        if (HttpChannelImpl.isIgnoreUncknownSSLCertificates()) {
             ignoreUnknownSSLCerticates();
         }
 

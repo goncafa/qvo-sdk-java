@@ -12,13 +12,6 @@ public interface HttpChannel {
 
     HttpURLConnection createPostConnection(@NonNull final String endpoint) throws HttpException;
 
-    HttpURLConnection createPostConnection(@NonNull final String endpoint,
-                                           final boolean ignoreUncknownSSLCertificates) throws HttpException;
-
     HttpURLConnection createConnection(@NonNull final String endpoint,
                                        @NonNull final HttpRequestMethod method) throws HttpException;
-
-    HttpURLConnection createConnection(@NonNull final String endpoint,
-                                       @NonNull final HttpRequestMethod method,
-                                       final boolean ignoreUncknownSSLCertificates) throws HttpException;
 }

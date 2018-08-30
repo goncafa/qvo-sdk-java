@@ -4,16 +4,12 @@ import cl.qvo.net.http.RestClient;
 import cl.qvo.net.http.RestClientImpl;
 import cl.qvo.net.http.exception.RestException;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
-
-@RunWith(PowerMockRunner.class)
 public class RestClientTest {
     private static Logger log = LoggerFactory.getLogger(RestClientTest.class);
 
@@ -37,6 +33,6 @@ public class RestClientTest {
     @Test(expected = RestException.class)
     public void testQueryUnknownHost() throws RestException {
         RestClient restClient = RestClientImpl.getInstance();
-        restClient.query("http://www.elpppp.com");
+        restClient.query("http://www.anyfakerurl.goncafa");
     }
 }
