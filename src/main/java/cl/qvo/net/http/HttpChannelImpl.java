@@ -48,6 +48,17 @@ public class HttpChannelImpl implements HttpChannel {
         return httpURLConnection;
     }
 
+    public HttpURLConnection createPutConnection(@NonNull final String endpoint)
+            throws HttpException {
+        final HttpURLConnection httpURLConnection = createConnection(
+                endpoint,
+                HttpRequestMethod.PUT);
+        httpURLConnection.setDoInput(true);
+        httpURLConnection.setDoOutput(true);
+
+        return httpURLConnection;
+    }
+
     public HttpURLConnection createConnection(@NonNull final String endpoint,
                                               @NonNull final HttpRequestMethod method) throws HttpException {
         final URL url;
