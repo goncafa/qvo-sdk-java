@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 public class RestClientTest {
@@ -16,8 +16,8 @@ public class RestClientTest {
     @Test
     public void testPostJsonReal() throws RestException {
         RestClient restClient = RestClientImpl.getInstance();
-        final String jsonOut = restClient.postJson("https://jsonplaceholder.typicode.com/users",
-                "{\"name\": \"Leanne Graham\"}");
+        final String jsonOut = restClient.post("https://jsonplaceholder.typicode.com/users",
+                "{\"name\": \"Leanne Graham\"}", RestClient.addJsonHeaders(null));
         log.debug(jsonOut);
         assertNotNull(jsonOut);
     }

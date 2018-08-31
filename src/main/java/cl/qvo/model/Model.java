@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +35,11 @@ abstract class Model {
 
     Model post(Object data) throws RestException {
         String url = String.format("%s/%s", getEnvironment(), getEndpoint());
-        String jsonOut = getRestClient().postJson(url, gson.toJson(data), addQvoAuthorizationHeader());
+
+        final Map<String, String> qvoHeaders = createQvoAuthorizationHeader();
+        RestClient.addJsonHeaders(qvoHeaders);
+
+        String jsonOut = getRestClient().post(url, gson.toJson(data), qvoHeaders);
 
         copy(gson.fromJson(jsonOut, getClass()));
 
@@ -43,7 +48,7 @@ abstract class Model {
 
     Model get() throws RestException {
         String url = String.format("%s/%s/%s", getEnvironment(), getEndpoint(), getId());
-        final String jsonOut = getRestClient().query(url, addQvoAuthorizationHeader());
+        final String jsonOut = getRestClient().query(url, createQvoAuthorizationHeader());
 
         copy(gson.fromJson(jsonOut, getClass()));
 
@@ -62,14 +67,11 @@ abstract class Model {
         return Qvo.getApiEnvironment();
     }
 
-    private Map<String, String> addQvoAuthorizationHeader() {
-        return addQvoAuthorizationHeader(null);
+    private Map<String, String> createQvoAuthorizationHeader() {
+        return addQvoAuthorizationHeader(new HashMap<String, String>());
     }
 
-    private Map<String, String> addQvoAuthorizationHeader(Map<String, String> headers) {
-        if (null == headers)
-            headers = new HashMap<>();
-
+    private Map<String, String> addQvoAuthorizationHeader(@NonNull Map<String, String> headers) {
         // set qvo authorization header
         headers.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
 

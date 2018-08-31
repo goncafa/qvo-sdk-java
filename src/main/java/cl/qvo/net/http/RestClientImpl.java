@@ -14,17 +14,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Scanner;
 
-public class RestClientImpl implements RestClient {
+public class RestClientImpl extends RestClient {
     @Getter @Setter
     private HttpChannel httpChannel = HttpChannelImpl.getInstance();
 
-    public String postJson(@NonNull final String endpoint, @NonNull final String jsonIn) throws RestException {
-        return postJson(endpoint, jsonIn, null);
+    public String post(@NonNull final String endpoint, @NonNull final String data) throws RestException {
+        return post(endpoint, data, null);
     }
 
-    public String postJson(@NonNull final String endpoint,
-                           @NonNull final String jsonIn,
-                           Map<String,String> requestProperties) throws RestException {
+    public String post(@NonNull final String endpoint,
+                       @NonNull final String data,
+                       Map<String,String> requestProperties) throws RestException {
         final HttpURLConnection post;
         try {
             post = getHttpChannel().createPostConnection(endpoint);
@@ -38,18 +38,13 @@ public class RestClientImpl implements RestClient {
         // we work with UTF-8
         post.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
 
-        // json properties
-        post.setRequestProperty("Accept", "application/json");
-        post.setRequestProperty("Content-Type", String.format("%s;charset=%s", "application/json",
-                StandardCharsets.UTF_8.name().toLowerCase()));
-
         if (null != requestProperties)
             for (Map.Entry<String, String> param : requestProperties.entrySet())
                 post.setRequestProperty(param.getKey(), param.getValue());
 
         // post json
         try (final OutputStream outputStream = post.getOutputStream()) {
-            outputStream.write(jsonIn.getBytes(StandardCharsets.UTF_8));
+            outputStream.write(data.getBytes(StandardCharsets.UTF_8));
 
             // get response code
             final int responseCode = post.getResponseCode();
