@@ -33,19 +33,6 @@ abstract class Model {
                 .create();
     }
 
-    Model post(Object data) throws RestException {
-        String url = String.format("%s/%s", getEnvironment(), getEndpoint());
-
-        final Map<String, String> qvoHeaders = createQvoAuthorizationHeader();
-        RestClient.addJsonHeaders(qvoHeaders);
-
-        String jsonOut = getRestClient().post(url, gson.toJson(data), qvoHeaders);
-
-        copy(gson.fromJson(jsonOut, getClass()));
-
-        return this;
-    }
-
     Model get() throws RestException {
         String url = String.format("%s/%s/%s", getEnvironment(), getEndpoint(), getId());
         final String jsonOut = getRestClient().query(url, createQvoAuthorizationHeader());
@@ -55,9 +42,30 @@ abstract class Model {
         return this;
     }
 
-    Model update() {
+    Model post() throws RestException {
+        String url = String.format("%s/%s", getEnvironment(), getEndpoint());
 
-        return null;
+        final Map<String, String> qvoHeaders = createQvoAuthorizationHeader();
+        RestClient.addJsonHeaders(qvoHeaders);
+
+        String jsonOut = getRestClient().post(url, gson.toJson(this), qvoHeaders);
+
+        copy(gson.fromJson(jsonOut, getClass()));
+
+        return this;
+    }
+
+    Model put() throws RestException {
+        String url = String.format("%s/%s/%s", getEnvironment(), getEndpoint(), getId());
+
+        final Map<String, String> qvoHeaders = createQvoAuthorizationHeader();
+        RestClient.addJsonHeaders(qvoHeaders);
+
+        String jsonOut = getRestClient().put(url, gson.toJson(this), qvoHeaders);
+
+        copy(gson.fromJson(jsonOut, getClass()));
+
+        return this;
     }
 
     private ApiEnvironment getEnvironment() {
@@ -102,4 +110,8 @@ abstract class Model {
     abstract String getEndpoint();
 
     abstract Model create() throws RestException;
+
+    abstract Model load() throws RestException;
+
+    abstract Model update() throws RestException;
 }

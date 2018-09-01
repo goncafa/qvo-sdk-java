@@ -13,6 +13,7 @@ import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -20,6 +21,8 @@ public class CustomerTest {
     private Logger log = LoggerFactory.getLogger(CustomerTest.class);
     private static Faker faker;
     private static String customerId;
+    private static String customerName;
+    private static Customer loaded;
 
     @BeforeClass
     public static void setup() {
@@ -43,6 +46,7 @@ public class CustomerTest {
         assertNotNull(create.getId());
 
         customerId = create.getId();
+        customerName = create.getName();
 
         log.debug(create.toString());
     }
@@ -51,6 +55,19 @@ public class CustomerTest {
     public void b_LoadTest() throws RestException {
         Customer customer = new Customer()
                 .setId(customerId);
-        log.debug(customer.load().toString());
+        customer.load();
+
+        assertNotNull(customer);
+        assertEquals(customerName, customer.getName());
+
+        loaded = customer;
+
+        log.debug(customer.toString());
+    }
+
+    @Test
+    public void c_UpdateTest() throws RestException {
+        loaded.setName("new name");
+        log.debug(loaded.update().toString());
     }
 }
