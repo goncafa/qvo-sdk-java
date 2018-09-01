@@ -18,47 +18,6 @@ public class RestClientImpl extends RestClient {
     @Getter @Setter
     private HttpChannel httpChannel = HttpChannelImpl.getInstance();
 
-    public String post(@NonNull final String endpoint, @NonNull final String data) throws RestException {
-        return post(endpoint, data, null);
-    }
-
-    public String post(@NonNull final String endpoint,
-                       @NonNull final String data,
-                       Map<String,String> requestProperties) throws RestException {
-        final HttpURLConnection post;
-        try {
-            post = getHttpChannel().createPostConnection(endpoint);
-        } catch (HttpException e) {
-            throw new RestException(e);
-        }
-
-        if (null == post)
-            throw new RestException(String.format("Could not create the connection with the endpoint %s", endpoint));
-
-        // we work with UTF-8
-        post.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
-
-        if (null != requestProperties)
-            for (Map.Entry<String, String> param : requestProperties.entrySet())
-                post.setRequestProperty(param.getKey(), param.getValue());
-
-        // post json
-        try (final OutputStream outputStream = post.getOutputStream()) {
-            outputStream.write(data.getBytes(StandardCharsets.UTF_8));
-
-            // get response code
-            final int responseCode = post.getResponseCode();
-
-            // read response data
-            // if response code is < HttpURLConnection.HTTP_BAD_REQUEST read the InputStream
-            // else response come on ErrorStream
-            boolean isOk = responseCode < HttpURLConnection.HTTP_BAD_REQUEST;
-            return readBody(post, responseCode, isOk);
-        } catch (IOException e) {
-            throw new RestException(e);
-        }
-    }
-
     public String query(@NonNull final String endpoint) throws RestException {
         return query(endpoint, (String) null);
     }
@@ -88,6 +47,64 @@ public class RestClientImpl extends RestClient {
             boolean isOk = responseCode < HttpURLConnection.HTTP_BAD_REQUEST;
             return readBody(get, responseCode, isOk);
         } catch (IOException | HttpException e) {
+            throw new RestException(e);
+        }
+    }
+
+    public String post(@NonNull final String endpoint, @NonNull final String data) throws RestException {
+        return post(endpoint, data, null);
+    }
+
+    public String post(@NonNull final String endpoint,
+                       @NonNull final String data,
+                       Map<String,String> requestProperties) throws RestException {
+        final HttpURLConnection post;
+        try {
+            post = getHttpChannel().createPostConnection(endpoint);
+        } catch (HttpException e) {
+            throw new RestException(e);
+        }
+
+        return doCall(post, data, requestProperties);
+    }
+
+    public String put(@NonNull final String endpoint,
+                      @NonNull final String data,
+                      Map<String,String> requestProperties) throws RestException {
+        final HttpURLConnection put;
+        try {
+            put = getHttpChannel().createPutConnection(endpoint);
+        } catch (HttpException e) {
+            throw new RestException(e);
+        }
+
+        return doCall(put, data, requestProperties);
+    }
+
+    private String doCall(@NonNull HttpURLConnection connection,
+                          @NonNull final String data,
+                          Map<String,String> requestProperties)
+            throws RestException{
+        // we work with UTF-8
+        connection.setRequestProperty("Accept-Charset", StandardCharsets.UTF_8.name());
+
+        if (null != requestProperties)
+            for (Map.Entry<String, String> param : requestProperties.entrySet())
+                connection.setRequestProperty(param.getKey(), param.getValue());
+
+        // post json
+        try (final OutputStream outputStream = connection.getOutputStream()) {
+            outputStream.write(data.getBytes(StandardCharsets.UTF_8));
+
+            // get response code
+            final int responseCode = connection.getResponseCode();
+
+            // read response data
+            // if response code is < HttpURLConnection.HTTP_BAD_REQUEST read the InputStream
+            // else response come on ErrorStream
+            boolean isOk = responseCode < HttpURLConnection.HTTP_BAD_REQUEST;
+            return readBody(connection, responseCode, isOk);
+        } catch (IOException e) {
             throw new RestException(e);
         }
     }
