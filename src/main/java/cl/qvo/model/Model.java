@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,40 +33,57 @@ abstract class Model {
                 .create();
     }
 
-    Model post(Object data) throws RestException {
-        ApiEnvironment apiEnvironment = Qvo.getApiEnvironment();
-        if (null == apiEnvironment)
-            apiEnvironment = ApiEnvironment.SANDBOX;
+    Model get() throws RestException {
+        String url = String.format("%s/%s/%s", getEnvironment(), getEndpoint(), getId());
+        final String jsonOut = getRestClient().query(url, createQvoAuthorizationHeader());
 
-        // set qvo authorization header
-        Map<String, String> qvoHeaders = new HashMap<>();
-        qvoHeaders.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
-
-        String url = String.format("%s/%s", apiEnvironment, getEndpoint());
-        String jsonOut = getRestClient().postJson(url, gson.toJson(data), qvoHeaders);
-
-        final Class<? extends Model> type = getClass();
-        copy(gson.fromJson(jsonOut, type));
+        copy(gson.fromJson(jsonOut, getClass()));
 
         return this;
     }
 
-    Model get() throws RestException {
-        ApiEnvironment apiEnvironment = Qvo.getApiEnvironment();
-        if (null == apiEnvironment)
-            apiEnvironment = ApiEnvironment.SANDBOX;
+    Model post() throws RestException {
+        String url = String.format("%s/%s", getEnvironment(), getEndpoint());
 
-        // set qvo authorization header
-        Map<String, String> qvoHeaders = new HashMap<>();
-        qvoHeaders.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
+        final Map<String, String> qvoHeaders = createQvoAuthorizationHeader();
+        RestClient.addJsonHeaders(qvoHeaders);
 
-        String url = String.format("%s/%s/%s", apiEnvironment, getEndpoint(), getId());
-        final String jsonOut = getRestClient().query(url, qvoHeaders);
+        String jsonOut = getRestClient().post(url, gson.toJson(this), qvoHeaders);
 
-        final Class<? extends Model> type = getClass();
-        copy(gson.fromJson(jsonOut, type));
+        copy(gson.fromJson(jsonOut, getClass()));
 
         return this;
+    }
+
+    Model put() throws RestException {
+        String url = String.format("%s/%s/%s", getEnvironment(), getEndpoint(), getId());
+
+        final Map<String, String> qvoHeaders = createQvoAuthorizationHeader();
+        RestClient.addJsonHeaders(qvoHeaders);
+
+        String jsonOut = getRestClient().put(url, gson.toJson(this), qvoHeaders);
+
+        copy(gson.fromJson(jsonOut, getClass()));
+
+        return this;
+    }
+
+    private ApiEnvironment getEnvironment() {
+        if (null == Qvo.getApiEnvironment())
+            return ApiEnvironment.SANDBOX;
+
+        return Qvo.getApiEnvironment();
+    }
+
+    private Map<String, String> createQvoAuthorizationHeader() {
+        return addQvoAuthorizationHeader(new HashMap<String, String>());
+    }
+
+    private Map<String, String> addQvoAuthorizationHeader(@NonNull Map<String, String> headers) {
+        // set qvo authorization header
+        headers.put("Authorization",  String.format("Bearer %s", Qvo.getApiToken()));
+
+        return headers;
     }
 
     private void copy(Model origin) {
@@ -92,4 +110,8 @@ abstract class Model {
     abstract String getEndpoint();
 
     abstract Model create() throws RestException;
+
+    abstract Model load() throws RestException;
+
+    abstract Model update() throws RestException;
 }

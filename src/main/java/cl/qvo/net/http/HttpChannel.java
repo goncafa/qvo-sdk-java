@@ -12,6 +12,8 @@ public interface HttpChannel {
 
     HttpURLConnection createPostConnection(@NonNull final String endpoint) throws HttpException;
 
+    HttpURLConnection createPutConnection(@NonNull final String endpoint) throws HttpException;
+
     HttpURLConnection createConnection(@NonNull final String endpoint,
                                        @NonNull final HttpRequestMethod method) throws HttpException;
 }
